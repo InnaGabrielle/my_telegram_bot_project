@@ -18,3 +18,8 @@ class RecommendationState(StatesGroup):
     choosing_category = State()
     choosing_genre = State()
     receiving_recommendation = State()
+
+
+class VocabularyState(StatesGroup):
+    learning = State()
+    training = State()

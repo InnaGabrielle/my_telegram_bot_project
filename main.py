@@ -2,7 +2,7 @@ import config
 import logging
 from aiogram import Bot, Dispatcher, types
 import asyncio
-from handlers import random_fact, celebrity, chat_gpt, quiz, recommendations
+from handlers import random_fact, celebrity, chat_gpt, quiz, recommendations, vocabulary_trainer
 import openai
 import os
 from aiogram.filters import Command
@@ -39,6 +39,7 @@ async def main():
     dp.include_router(chat_gpt.router)
     dp.include_router(quiz.router)
     dp.include_router(recommendations.router)
+    dp.include_router(vocabulary_trainer.router)
 
 
     # Start bot polling
