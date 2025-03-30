@@ -1,10 +1,8 @@
 from aiogram import Router, types, F
 from aiogram.filters.command import Command
-from keyboards.kb_celebrity import kb_celeb
 from aiogram.fsm.context import FSMContext
-from keyboards.prof_keyboards import make_row_keyboard
-from aiogram.fsm.state import State, StatesGroup
-from utils import chat_gpt_service
+from states import UserState
+from keyboards.keyboards import menu_kb, celebrity_kb
 import openai
 
 router = Router()
@@ -21,16 +19,15 @@ celebrity_prompts = {
 # Dictionary to track conversation history per user
 user_histories = {}
 
-# States for FSM
-class CelebrityChoice(StatesGroup):
-    celebrity = State()
-    chatting = State()
+## States for FSM
+#class CelebrityChoice(StatesGroup):
+#    celebrity = State()
+#    chatting = State()
 
-
-
+# Handle "Chat with Celebrity" button and /talk command
+@router.message(lambda msg: msg.text == "Chat with Celebrity")
 @router.message(Command('talk'))
-async def command_talk(message: types.Message, state: FSMContext):
-
+async def select_celebrity(message: types.Message, state: FSMContext):
     image1 = 'https://en.wikipedia.org/wiki/File:Freddy_Krueger_(Robert_Englund).jpg'
     image2 = 'https://static.wikia.nocookie.net/hellraiser/images/a/a5/Pinhead_Hell_Priest.jpg/revision/latest?cb=20190605194826'
     image3 = 'https://static.wikia.nocookie.net/antagonisten/images/5/52/Chucky.jpg/revision/latest?cb=20161203190717&path-prefix=de'
@@ -39,67 +36,54 @@ async def command_talk(message: types.Message, state: FSMContext):
     await message.answer_photo(image2)
     await message.answer_photo(image3)
     await message.answer_photo(image4)
-    await message.answer(f'Hello, {message.chat.username}, choose your favourite celebrity', reply_markup=make_row_keyboard(celebrities))
-    await state.set_state(CelebrityChoice.celebrity)
+    await message.answer(f'Please choose a celebrity to chat with:', reply_markup=celebrity_kb)
+    await state.set_state(UserState.CELEBRITY_CHAT)
+
+# Handle celebrity selection
+@router.message(lambda msg: msg.text in celebrity_prompts.keys())
+async def chosen_celebrity(message: types.Message, state: FSMContext):
+    chosen_celeb = message.text
+    await state.update_data(celebrity=chosen_celeb) # Store selection in FSM
+    await message.answer(f"You have chosen {chosen_celeb}. Now start chatting!")
 
 
-@router.message(CelebrityChoice.celebrity, F.text.in_(celebrities))
-async def celeb_chosen(message: types.Message, state: FSMContext):
-    await state.update_data(celebrity=message.text)
-    user_data = await state.get_data()
-    # Initialize message history with system role
-    user_histories[message.from_user.id] = [{"role": "system", "content": celebrity_prompts[user_data["celebrity"]]}]
+# Handle user messages in "Chat with Celebrity" mode
+@router.message(UserState.CELEBRITY_CHAT)
+async def handle_celebrity_chat(message: types.Message, state: FSMContext):
+    user_input = message.text
 
-    await message.answer(
-        f'You have chosen: {user_data["celebrity"]}. Now start chatting!',
-        reply_markup=types.ReplyKeyboardRemove()
-    )
-    await state.set_state(CelebrityChoice.chatting)
-    #await state.clear()
-
-
-
-@router.message(CelebrityChoice.celebrity)
-async def celeb_incorrect(message: types.Message):
-    await message.answer('Choose your favourite celebrity from the GIVEN list', reply_markup=make_row_keyboard(celebrities))
-
-@router.message(F.text == "End Chat")
-async def end_chat(message: types.Message, state: FSMContext):
-    user_id = message.from_user.id
-
-    # Clear stored data
-    user_histories.pop(user_id, None)
-    await state.clear()
-    await message.answer("Chat ended. Use \n -/talk \n -/gpt \n -/random \n to start again.", reply_markup=types.ReplyKeyboardRemove())
-
-@router.message(CelebrityChoice.chatting)
-async def chat_with_celebrity(message: types.Message, state: FSMContext):
-    user_id = message.from_user.id
-
-    # Ensure message history exists
-    if user_id not in user_histories:
-        await message.answer("An error occurred. Please use /talk again.")
+    # Check if user wants to finish chat
+    if user_input == "/finish":
+        await finish_chat(message, state)
         return
 
-    # Append user's message to chat history
-    user_histories[user_id].append({"role": "user", "content": message.text})
+    data = await state.get_data()
+    chosen_celeb = data.get("celebrity")
 
+    if chosen_celeb not in celebrity_prompts:
+        await message.answer("Please choose a celebrity first!", reply_markup=celebrity_kb)
+        return
 
-    # Call OpenAI API with full conversation history
+    system_prompt = celebrity_prompts[chosen_celeb]
+
     response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=user_histories[user_id]
+        model="gpt-3.5-turbo",
+        messages=[{"role": "system", "content": system_prompt},
+                  {"role": "user", "content": user_input}]
     )
 
+    chat_reply = response["choices"][0]["message"]["content"]
+    await message.answer(chat_reply)
 
-    # Extract AI response and append it to history
-    bot_reply = response.choices[0].message.content
-    user_histories[user_id].append({"role": "assistant", "content": bot_reply})
+# Handle /finish command to exit chat mode
+@router.message(Command("finish"))
+async def finish_chat(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("Chat session ended. Choose an option:", reply_markup=menu_kb)
 
-    # Send response with "End Chat" button
-    end_chat_button = types.ReplyKeyboardMarkup(
-        keyboard=[[types.KeyboardButton(text="End Chat")]],
-        resize_keyboard=True
-    )
-
-    await message.answer(bot_reply, reply_markup=end_chat_button)
+## Handle "Back to Menu" button
+#@router.message(lambda msg: msg.text == "Back to Menu")
+#async def back_to_menu(message: types.Message, state: FSMContext):
+#    await state.clear()
+#    await message.answer("Back to main menu:", reply_markup=menu_kb)
+#

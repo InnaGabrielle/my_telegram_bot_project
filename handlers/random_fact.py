@@ -1,37 +1,47 @@
 from aiogram import Router, types, F
 from aiogram.filters.command import Command
-#from handlers.chat_gpt import get_chatgpt_response
-from utils.chat_gpt_service import get_chatgpt_response
-
-from keyboards.kb_random import kb1
-from keyboards.kb_celebrity import kb_celeb
+import random
+import openai
+from keyboards.keyboards import random_fact_kb, menu_kb
+from aiogram.fsm.context import FSMContext
 
 router = Router()
-prompt_random = "Give me a true random fact about programming in python"
+prompt_random = [
+        "Tell me a fun and lesser-known fact about Python programming.",
+        "Give me an interesting Python fact that most people don’t know.",
+        "Share a surprising fact about the Python programming language.",
+        "What’s a cool historical fact about Python?",
+        "Provide a fascinating detail about Python’s design or syntax.",
+    ]
 
-# /start
-@router.message(Command('start'))
-@router.message(Command('finish'))
-async def command_start(message: types.Message):
-    await message.answer(f'Hello, dear {message.chat.username}, I am javarush bot', reply_markup=kb1)
+
+
+# Function to generate a random Python fact using ChatGPT
+async def get_random_fact():
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": random.choice(prompt_random)}
+        ]
+    )
+    return response["choices"][0]["message"]["content"]
 
 # /random
 @router.message(Command('random'))
-@router.message(Command('another_random_fact'))
-async def command_start(message: types.Message):
+@router.message(lambda msg: msg.text == "Random Fact")
+@router.message(lambda msg: msg.text == "Another Random Fact")
+async def random_fact(message: types.Message, state: FSMContext):
     image = "https://lacvets.com/wp-content/uploads/2023/01/what-is-a-cats-lifespan-lakeland-fl-300x200.jpg"
     await message.answer_photo(image)
-    response = await get_chatgpt_response(prompt=prompt_random)
-    await message.answer(response, reply_markup=kb1)
+    await state.set_state("FACT_MODE")  # Set FSM state
+    response = await get_random_fact()
+    await message.answer(f"💡 Python Fact:\n{response}", reply_markup=random_fact_kb)
 
 
-
-@router.message(F.text)
-async def echo(message: types.Message):
-    print(message.text)
-    if 'stop' in message.text:
-        await message.answer('ok, as you wish')
-    else:
-        await message.answer(message.text)
-
-
+## Handle /finish command and "Back to Menu" button
+#@router.message(Command("finish"))
+#@router.message(lambda msg: msg.text == "Back to Menu")
+#async def finish_fact_session(message: types.Message, state: FSMContext):
+#    await state.clear()  # Reset user state
+#    await message.answer("Fact session ended. Back to main menu:", reply_markup=menu_kb)
+#
