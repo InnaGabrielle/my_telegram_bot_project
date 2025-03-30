@@ -13,3 +13,8 @@ class QuizState(StatesGroup):
     waiting_for_topic = State()
     in_quiz = State()
 
+
+class RecommendationState(StatesGroup):
+    choosing_category = State()
+    choosing_genre = State()
+    receiving_recommendation = State()

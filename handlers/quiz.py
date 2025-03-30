@@ -3,13 +3,9 @@ from aiogram import Router
 from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
 from keyboards.keyboards import quiz_kb, topic_kb, menu_kb
-from config import OPENAI_API_KEY
 from states import QuizState
 import re
-
-
 
 
 router = Router()
@@ -62,7 +58,7 @@ async def stop_quiz(message: Message, state: FSMContext):
     correct_answers = data.get("correct_answers", 0)
     question_counter = data.get("user_answers", 0)
     await state.clear()  # Reset state
-    await message.answer(f"🎉 Quiz ended! You got {correct_answers} correct answers from {question_counter} questions.", reply_markup=menu_kb)
+    await message.answer(f"Quiz ended! You got {correct_answers} correct answers from {question_counter} questions.", reply_markup=menu_kb)
 
 # Handle topic selection
 @router.message(QuizState.waiting_for_topic)
@@ -96,8 +92,6 @@ async def answer_quiz(message: Message, state: FSMContext):
     data = await state.get_data()
     correct_answer = data.get("correct_answer")
     correct_answers = data.get("correct_answers", 0)
-    #topic = data.get("topic")
-    #correct_answers = data.get("correct_answers", 0)
     user_answer = message.text.strip()
     question_counter = data.get("user_answers", 0)
 
@@ -109,36 +103,13 @@ async def answer_quiz(message: Message, state: FSMContext):
     # Check if the user's answer is correct
     if user_answer == correct_answer:
         correct_answers += 1
-        await message.answer("✅ Correct!")
+        await message.answer("Correct!")
     else:
-        await message.answer(f"❌ Incorrect! The correct answer was: **{correct_answer}**")
+        await message.answer(f"Incorrect! The correct answer was: **{correct_answer}**")
     question_counter +=1
     await state.update_data(correct_answers=correct_answers)
     await state.update_data(user_answers=question_counter)
 
     # Show "Next Question" and "Stop Quiz" buttons
-    await message.answer("🔄 Click 'Next Question' to continue or 'Stop Quiz' to end.", reply_markup=quiz_kb)
-
-###    # Ask ChatGPT if the user's answer is correct
-###    prompt = f"For the topic {topic}, is the following answer correct: '{message.text}'? Respond with only 'Correct' or 'Incorrect'."
-###    response = openai.ChatCompletion.create(
-###        model="gpt-3.5-turbo",
-###        messages=[
-###            {"role": "system", "content": "You are a strict quiz evaluator. Only reply with 'Correct' or 'Incorrect'."},
-###            {"role": "user", "content": prompt}
-###        ]
-###    )
-
-    ###is_correct = response["choices"][0]["message"]["content"].strip()
-###
-    ###if is_correct.lower() == "correct":
-    ###    correct_answers += 1
-    ###    await message.answer("✅ Correct!")
-    ###else:
-    ###    await message.answer("❌ Incorrect.")
-###
-    ###await state.update_data(correct_answers=correct_answers)
-###
-    #### Show "Next Question" and "Stop Quiz" buttons
-    ###await message.answer("🔄 Click 'Next Question' to continue or 'Stop Quiz' to end.", reply_markup=quiz_kb)
+    await message.answer("Click 'Next Question' to continue or 'Stop Quiz' to end.", reply_markup=quiz_kb)
 

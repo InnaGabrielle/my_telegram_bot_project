@@ -2,7 +2,7 @@ import config
 import logging
 from aiogram import Bot, Dispatcher, types
 import asyncio
-from handlers import random_fact, celebrity, chat_gpt, quiz
+from handlers import random_fact, celebrity, chat_gpt, quiz, recommendations
 import openai
 import os
 from aiogram.filters import Command
@@ -28,6 +28,7 @@ async def main():
     # /start command handler
     @dp.message(lambda msg: msg.text == "Back to Menu")
     @dp.message(Command("start"))
+    @dp.message(Command("finish"))
     async def start(message: Message, state: FSMContext):
         await state.clear()  # Reset user state
         await message.answer(f"Hello, dear {message.chat.username}! Choose an option:", reply_markup=menu_kb)
@@ -37,6 +38,8 @@ async def main():
     dp.include_router(random_fact.router)
     dp.include_router(chat_gpt.router)
     dp.include_router(quiz.router)
+    dp.include_router(recommendations.router)
+
 
     # Start bot polling
     try:

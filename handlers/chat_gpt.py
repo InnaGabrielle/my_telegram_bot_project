@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from states import UserState
 from keyboards.keyboards import chat_gpt_kb
 import openai
-from utils import end_chat
+
 
 
 router = Router()
