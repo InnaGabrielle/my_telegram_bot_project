@@ -84,7 +84,7 @@ my_telegram_bot_project/
 │-- keyboards
 │   │-- keyboards.py    # defines the keyboards
 │-- .env                  # API keys and environment variables
-│-- main.py               # defines FSM states to track active sessions.
+│-- states.py               # defines FSM states to track active sessions.
 ```
 
 ## Future Enhancements
