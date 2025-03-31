@@ -1,0 +1,97 @@
+# Multi-Feature Telegram Bot
+
+## Overview
+This is a multi-functional Telegram bot built using `aiogram` and OpenAI's ChatGPT. It provides users with several interactive features, including random facts, quizzes, celebrity chat, recommendations, and direct ChatGPT interaction.
+
+## Features
+### 1. **Random Facts**
+- Get a random fact about python programming language.
+- Uses ChatGPT to generate unique facts.
+- Button: "Random Fact" and "Another Fact" to get a new fact.
+- Command: `/random`
+
+### 2. **Quiz Game**
+- Choose a topic (Music, Geography, Python, History).
+- Receive a question with multiple-choice answers (A, B, C).
+- ChatGPT validates the answer.
+- Buttons:
+  - "Quiz" to start the quiz
+  - "Next Question" to continue.
+  - "Stop Quiz" to end and see the final score.
+- Command: `/quiz`
+
+### 3. **Chat with Celebrity**
+- Simulate conversations with famous characters:
+  - Freddy Krueger
+  - Pinhead
+  - Chucky
+  - Jigsaw
+- Interactive, AI-powered responses.
+- Command: `/talk` to start a chat session.
+- Command: `/finish` to end the session.
+
+### 4. **Movie, Book, and Music Recommendations**
+- Select a category (Movies, Books, Music).
+- Choose a genre.
+- ChatGPT provides recommendations.
+- "👎 Dislike" button removes uninteresting suggestions and refines recommendations.
+- Command: `/recommend`
+
+### 5. **ChatGPT Interface**
+- Open-ended AI conversation.
+- User messages get direct responses from ChatGPT.
+- Command: `/gpt`
+
+## Installation
+### Prerequisites
+- Python 3.8+
+- `aiogram` library
+- Telegram Token
+- OpenAI API key
+
+### Steps
+1. Clone the repository
+
+
+2. Set up environment variables:
+   - Create a `.env` file from the given template.
+   - Add your OpenAI API key and Telegram token
+
+4. Run the bot:
+   ```sh
+   python main.py
+   ```
+
+## Usage
+- `/start` → Show main menu.
+- `/random` → Get a random fact.
+- `/quiz` → Start a quiz game.
+- `/talk` → Chat with a celebrity.
+- `/recommend` → Get movie, book, or music recommendations.
+- `/gpt` → Chat with ChatGPT.
+- `/finish` → End the current session.
+
+## File Structure
+```
+my_telegram_bot_project/
+│-- main.py                # Main bot entry point
+│-- handlers/
+│   │-- random_fact.py    # Handles random facts feature
+│   │-- quiz.py           # Handles quiz game
+│   │-- celebrity_chat.py # Handles celebrity chat
+│   │-- recommendations.py # Handles recommendations
+│   │-- chat_gpt.py       # Handles ChatGPT interface
+│-- keyboards
+│   │-- keyboards.py    # defines the keyboards
+│-- .env                  # API keys and environment variables
+│-- main.py               # defines FSM states to track active sessions.
+```
+
+## Future Enhancements
+- Implement vocabulary trainer
+
+
+
+## Contributors
+- Inna Matviets
+

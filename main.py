@@ -1,4 +1,3 @@
-import config
 import logging
 from aiogram import Bot, Dispatcher, types
 import asyncio
@@ -9,13 +8,13 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from keyboards.keyboards import menu_kb
 from aiogram.fsm.context import FSMContext
+from dotenv import load_dotenv
 
-TOKEN_API = config.TOKEN_TG
-OPENAI_API_KEY = config.OPENAI_API_KEY
+load_dotenv()  # Load variables from .env
+TOKEN_API = os.getenv('TOKEN_TG')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 async def main():
-
-
     # Logging setup
     logging.basicConfig(level=logging.INFO)
 
@@ -25,7 +24,7 @@ async def main():
 
     openai.api_key = OPENAI_API_KEY
 
-    # /start command handler
+    # /start and /finish command handler
     @dp.message(lambda msg: msg.text == "Back to Menu")
     @dp.message(Command("start"))
     @dp.message(Command("finish"))
@@ -39,8 +38,6 @@ async def main():
     dp.include_router(chat_gpt.router)
     dp.include_router(quiz.router)
     dp.include_router(recommendations.router)
-    dp.include_router(vocabulary_trainer.router)
-
 
     # Start bot polling
     try:

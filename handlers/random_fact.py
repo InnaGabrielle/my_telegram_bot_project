@@ -26,6 +26,7 @@ async def get_random_fact():
     )
     return response["choices"][0]["message"]["content"]
 
+
 # /random
 @router.message(Command('random'))
 @router.message(lambda msg: msg.text == "Random Fact")
@@ -38,10 +39,3 @@ async def random_fact(message: types.Message, state: FSMContext):
     await message.answer(f"💡 Python Fact:\n{response}", reply_markup=random_fact_kb)
 
 
-## Handle /finish command and "Back to Menu" button
-#@router.message(Command("finish"))
-#@router.message(lambda msg: msg.text == "Back to Menu")
-#async def finish_fact_session(message: types.Message, state: FSMContext):
-#    await state.clear()  # Reset user state
-#    await message.answer("Fact session ended. Back to main menu:", reply_markup=menu_kb)
-#

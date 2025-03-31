@@ -1,16 +1,13 @@
 import openai
-import re
 from aiogram import Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from keyboards.keyboards import category_kb
 from aiogram.utils.keyboard import InlineKeyboardMarkup, InlineKeyboardButton
+from keyboards.keyboards import category_kb
 from states import RecommendationState
 
 router = Router()
-
-
 
 
 # Handle /recommend command and Button to start recommendation session
@@ -25,7 +22,9 @@ async def start_recommendation(message: Message, state: FSMContext):
 # see keyboard definition in keyboards.py).
 # In Aiogram, when a user presses an inline button, the bot receives a callback query instead of a regular message.
 # This decorator ensures that the bot listens for specific callback queries.
-@router.callback_query(lambda c: c.data.startswith("category_")) # c is the callback query object; c.data is the data payload of the clicked button. This data was defined when the button was created ("category_movies", "category_books").
+@router.callback_query(lambda c: c.data.startswith("category_")) # c is the callback query object; c.data is the data
+# payload of the clicked button. This data was defined when the button was created ("category_movies",
+# "category_books").
 async def choose_category(callback: CallbackQuery, state: FSMContext):
     category = callback.data.split("_")[1]  # Extract 'movies', 'books', or 'music'
     await state.update_data(category=category, disliked_items=[])

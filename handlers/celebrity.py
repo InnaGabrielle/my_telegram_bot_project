@@ -1,9 +1,10 @@
 from aiogram import Router, types, F
 from aiogram.filters.command import Command
 from aiogram.fsm.context import FSMContext
+import openai
 from states import UserState
 from keyboards.keyboards import menu_kb, celebrity_kb
-import openai
+
 
 router = Router()
 
@@ -19,10 +20,6 @@ celebrity_prompts = {
 # Dictionary to track conversation history per user
 user_histories = {}
 
-## States for FSM
-#class CelebrityChoice(StatesGroup):
-#    celebrity = State()
-#    chatting = State()
 
 # Handle "Chat with Celebrity" button and /talk command
 @router.message(lambda msg: msg.text == "Chat with Celebrity")
